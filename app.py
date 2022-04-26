@@ -1,10 +1,24 @@
-from pwa import app, db
-from pwa.models import User
-from pwa.forms import RegistrationForm, LoginForm
+from main import app, db
+from main.models import User
+from main.forms import RegistrationForm, LoginForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_user, login_required, logout_user, current_user
 
+@app.route('/logout') # Logt de gebruiker uit
+@login_required
+def logout():
+    logout_user()
+    flash('Je bent nu uitgelogd!')
+    return redirect(url_for('login'))
+
+@app.route('/basetemp')
+def base():
+    return render_template('base.html')
+
+@app.route('/vragenlijst')
+def vragenlijst():
+    return render_template('vragenlijst.html')
 
 @app.route('/')
 def home():
@@ -20,6 +34,7 @@ def login():
             if user.check_password(form.wachtwoord.data):
 
                 login_user(user)
+                print('Je bent ingelogd')
                 flash('Logged in successfully.')
 
                 next = request.args.get('next')
@@ -30,7 +45,7 @@ def login():
                 return redirect(next)
         else:
             flash('Inloggen mislukt, probeer opnieuw.')
-            return render_template('login', form=form)
+            return render_template('login.html', form=form)
     return render_template('login.html', form=form)
 
 @app.route('/register', methods=['POST', 'GET'])
@@ -49,8 +64,9 @@ def register():
     return render_template('register.html', form=form)
 
 @app.route('/profiel')
+@login_required
 def profiel():
     return render_template('profiel.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True)
